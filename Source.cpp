@@ -13,6 +13,19 @@ struct Human
     string FIO;
     Date DateOfBirth;
     unsigned int passportNumber;
+    void Fill() 
+    {
+        srand(time(0));
+        vector <string> names = { "Nikolay", "Oleg", "Vadim", "Alexander", "Artem" }; //заранее подготовленные массивы фамилий
+        vector <string> surnames = { "Tedeev" , "Karelov", "Kuznetsov", "Galinov", "Chernykh" };
+        vector <string> patronymic = { "Andreevich","Alexandrovich", "Mikhailovich", "Petrovich","Dmitryevich" };
+    
+        FIO = surnames[rand() % surnames.size()] + " " + names[rand() % names.size()] + " " + patronymic[rand() % patronymic.size()];
+        DateOfBirth.Day = rand() % 28 + 1;
+        DateOfBirth.Month = rand() % 12 + 1;
+        DateOfBirth.Year = rand() % 100 + 1921;
+        passportNumber = rand() % 6000 + 1;
+    }
 };
 
 int GetSize()
@@ -41,7 +54,7 @@ int GetMenu()
     cout << "7. Добавить элемент в список." << endl;
     cout << "0. Выход." << endl;
     cout << "Поле ввода:\t";
-    while (!(cin >> menu) || (cin.peek() != '\n') || (menu < 0) || (menu > 6))
+    while (!(cin >> menu) || (cin.peek() != '\n') || (menu < 0) || (menu > 7))
     {
         cin.clear();
         while (cin.get() != '\n')
@@ -186,12 +199,12 @@ int main()
                 {
                     cout << "Список с людьми:" << endl;
                     Print_list(Humans);
-                    cout << "===============================================================" << endl;
+                    cout << "===============================================================" << endl << endl;
                 }
                 else
                 {
                     cout << "Список пуст!" << endl;
-                    cout << "===============================================================" << endl;
+                    cout << "===============================================================" << endl << endl;
                 }
                 menu = -1;
                 break;
@@ -228,12 +241,12 @@ int main()
                         if (pos != -1) 
                         {
                             cout << "Элемент с такой датой рождения найден. Он находится в списке под номером: " << pos + 1 << endl;
-                            cout << "===============================================================" << endl;
+                            cout << "===============================================================" << endl << endl;
                         }
                         else 
                         {
                             cout << "Элемента с такой датой рождения нет!" << endl;
-                            cout << "===============================================================" << endl;
+                            cout << "===============================================================" << endl << endl;
                         }
                         break;
                     }
@@ -282,7 +295,7 @@ int main()
                     getline(cin, value);
                     check_delete = DeleteHuman(Humans, value);
                     Print_list(Humans);
-                    cout << "===============================================================" << endl;
+                    cout << "===============================================================" << endl << endl;
                 }
                 menu = -1;
                 break;
@@ -293,14 +306,14 @@ int main()
             if (check_delete)
             {
                 cout << "Удаление элементов отменено!" << endl;
-                cout << "===============================================================" << endl;
+                cout << "===============================================================" << endl << endl;
                 Humans = reserveHumans;
                 check_delete = false;
             }
             else 
             {
                 cout << "Элементы из списка не удалялись!" << endl;
-                cout << "===============================================================" << endl;
+                cout << "===============================================================" << endl << endl;
             }
                 menu = -1;
                 break;
@@ -311,7 +324,65 @@ int main()
             }
             case 7: //добавление в список
             {
-                
+                int add;
+                cout << endl;
+                cout << "Введите каким способом вы хотите добавить элемент в список:" << endl;
+                cout << "1. Добавить в начало списка." << endl;
+                cout << "2. Добавить в конец списка" << endl;
+                cout << "3. Вставить по индексу." << endl;
+                cout << "0. Выйти в меню." << endl;
+                cout << "Поле ввода:\t";
+                while (!(cin >> add) || (cin.peek() != '\n') || (add < 0) || (add > 3))
+                {
+                    cin.clear();
+                    while (cin.get() != '\n')
+                    {
+                        cout << "Введите корректное число:\t";
+                    }
+                }
+                switch (add) 
+                {
+                    case 1: 
+                    {
+                        Human tmp;
+                        tmp.Fill();
+                        Humans.insert(Humans.begin(), tmp);
+                        cout << "===============================================================" << endl << endl;
+                        break;
+                    }
+                    case 2: 
+                    {
+                        Human tmp;
+                        tmp.Fill();
+                        Humans.push_back(tmp);
+                        cout << "===============================================================" << endl << endl;
+                        break;
+                    }
+                    case 3: 
+                    {
+                        int i;
+                        cout << "Введите позицию, куда хотите добавить элемент:\t";
+                        while (!(cin >> i) || (cin.peek() != '\n') || (i < 0) || (i > Humans.size()))
+                        {
+                            cin.clear();
+                            while (cin.get() != '\n')
+                            {
+                                cout << "Введите корректное число:\t";
+                            }
+                        }
+                        Human tmp;
+                        tmp.Fill();
+                        Humans.insert(Humans.begin() + i, tmp);
+                        cout << "===============================================================" << endl << endl;
+                        break;
+                    }
+                    case 0: 
+                    {
+                        cout << "Выход..." << endl;
+                        break;
+                    }
+                }
+                menu = -1;
                 break;
             }
             case 0: //выход
