@@ -2,11 +2,21 @@
 #include <string>
 #include <vector>
 #include <ctime>
+#include <fstream>
 using namespace std;
 
 struct Date
 {
     int Day, Month, Year;
+    void Get_date() 
+    {
+        cout << "Введите день:\t";
+        cin >> Day;
+        cout << "Введите месяц:\t";
+        cin >> Month;
+        cout << "Введите год:\t";
+        cin >> Year;
+    }
 };
 struct Human
 {
@@ -146,6 +156,73 @@ int Substring_search(vector<Human> humans, Date key)
 
     return -1;
 }
+int Line_search(vector<Human> humans, Date key) 
+{
+    vector<int> date_list;
+    int tmp_key = key.Day * 1000000 + key.Month * 10000 + key.Year;
+    for (int i = 0; i < humans.size(); i++)
+    {
+        date_list.push_back(humans[i].DateOfBirth.Day*1000000 + humans[i].DateOfBirth.Month*10000 + humans[i].DateOfBirth.Year);
+    }
+    for (int i = 0; i < date_list.size(); i++) 
+    {
+        if (date_list[i] == tmp_key) 
+        {
+            return i;
+        }
+    }
+    return -1;
+}
+void Shell_sort(vector<int>& humans) 
+{
+    int size = humans.size();
+    for (int step = size / 2; size > 0; size /= 2) 
+    {
+        for (int i = step; i < size; i++) 
+        {
+            for (int j = i; j >= step; j -= step) 
+            {
+                if (humans[j] < humans[j - step]) 
+                {
+                    int tmp = humans[j];
+                    humans[j] = humans[j - step];
+                    humans[j - step] = tmp;
+                }
+            }
+        }
+    }
+}
+bool Interpol_search(vector<Human>& humans, Date key) 
+{
+    bool check = false;
+    vector<int> date_list;
+    int tmp_key = key.Day * 1000000 + key.Month * 10000 + key.Year;
+    for (int i = 0; i < humans.size(); i++)
+    {
+        date_list.push_back(humans[i].DateOfBirth.Day * 1000000 + humans[i].DateOfBirth.Month * 10000 + humans[i].DateOfBirth.Year);
+    }
+    Shell_sort(date_list); // сортировка по возрастанию
+    
+    int mid = 0, left = 0, right = date_list.size() - 1;
+    while (date_list[left] <= tmp_key && date_list[right] >= tmp_key) 
+    {
+        mid = left + ((tmp_key - date_list[left]) * (right - left)) / (date_list[right] - date_list[left]);
+        if (date_list[mid] < tmp_key)
+        {
+            left = ++mid;
+        }
+        else if (date_list[mid] > tmp_key)
+        {
+            right = --mid;
+        }
+        else 
+        {
+            check = true;
+            return check;
+        }
+    }
+    return check;
+}
 
 bool DeleteHuman(vector <Human>& list, string value) 
 {
@@ -169,17 +246,32 @@ bool DeleteHuman(vector <Human>& list, string value)
     return check;
 }
 
+void Save_list(vector<Human> list) 
+{
+    ofstream output("Saved.txt");
+    for (int i = 0; i < list.size(); i++)
+    {
+        output << "===========================================================" << endl;
+        output << i + 1 << "-й пользователь" << endl;
+        output << "ФИО:\t" << list[i].FIO << endl;
+        string pasport = to_string(list[i].passportNumber);
+        output << "Номер паспорта:\t" << pasport << endl;
+        string date = to_string(list[i].DateOfBirth.Day) + "." + to_string(list[i].DateOfBirth.Month) + "." + to_string(list[i].DateOfBirth.Year);
+        output << "Дата рождения:\t" << date << endl;
+    }
+    output << "===========================================================" << endl;
+    output.close();
+}
 int main()
 {
     setlocale(LC_ALL, "ru");
     vector <Human> Humans;
-    vector <Human> reserveHumans;
+    vector <Human> reserveHumans = Humans;
     bool check_delete = false;
     int menu = -1;
     while (menu == -1)
     {
         menu = GetMenu();
-        reserveHumans = Humans;
         switch (menu)
         {
             case 1: //заполнение списка
@@ -211,6 +303,13 @@ int main()
             }
             case 3: // поиск элемента в списке по ключу
             {
+                if (Humans.size() == 0) 
+                {
+                    cout << "Список пуст!" << endl;
+                    cout << "===============================================================" << endl << endl;
+                    menu = -1;
+                    break;
+                }
                 cout << "Выберете способ поиска!" << endl;
                 cout << "1. Подстроки в строке." << endl;
                 cout << "2. Линейный." << endl;
@@ -231,12 +330,7 @@ int main()
                     case 1: 
                     {
                         Date key;
-                        cout << "Введите день:\t";
-                        cin >> key.Day;
-                        cout << "Введите месяц:\t";
-                        cin >> key.Month;
-                        cout << "Введите год:\t";
-                        cin >> key.Year;
+                        key.Get_date();
                         int pos = Substring_search(Humans, key);
                         if (pos != -1) 
                         {
@@ -253,23 +347,34 @@ int main()
                     case 2: 
                     {
                         Date key;
-                        cout << "Введите день:\t";
-                        cin >> key.Day;
-                        cout << "Введите месяц:\t";
-                        cin >> key.Month;
-                        cout << "Введите год:\t";
-                        cin >> key.Year;
+                        key.Get_date();
+                        int pos = Line_search(Humans, key);
+                        if (pos != -1)
+                        {
+                            cout << "Элемент с такой датой рождения найден. Он находится в списке под номером: " << pos + 1 << endl;
+                            cout << "===============================================================" << endl << endl;
+                        }
+                        else
+                        {
+                            cout << "Элемента с такой датой рождения нет!" << endl;
+                            cout << "===============================================================" << endl << endl;
+                        }
                         break;
                     }
                     case 3: 
                     {
                         Date key;
-                        cout << "Введите день:\t";
-                        cin >> key.Day;
-                        cout << "Введите месяц:\t";
-                        cin >> key.Month;
-                        cout << "Введите год:\t";
-                        cin >> key.Year;
+                        key.Get_date();
+                        if (Interpol_search(Humans, key) == true)
+                        {
+                            cout << "Элемент с такой датой рождения найден." << endl;
+                            cout << "===============================================================" << endl << endl;
+                        }
+                        else
+                        {
+                            cout << "Элемента с такой датой рождения нет!" << endl;
+                            cout << "===============================================================" << endl << endl;
+                        }
                         break;
                     }
                     case 0: 
@@ -283,6 +388,7 @@ int main()
             }
             case 4: //удаление элемента из списка
             {
+                reserveHumans = Humans;
                 if (reserveHumans.size() == 0) 
                 {
                     cout << "Список пуст!" << endl;
@@ -320,6 +426,27 @@ int main()
             }
             case 6: //запись в файл
             {
+                if (Humans.size() == 0) 
+                {
+                    cout << "Список пуст, сохранять нечего!" << endl;
+                    cout << "===============================================================" << endl << endl;
+                    menu = -1;
+                    break;
+                }
+                ofstream output("Saved.txt");
+                if (output.is_open()) 
+                {
+                    Save_list(Humans);
+                    cout << "Запись в файл прошла успешно!" << endl;
+                    cout << "===============================================================" << endl << endl;
+                }
+                else 
+                {
+                    cout << "Не удалось открыть файл для сохранения, проверьте его на существование!" << endl;
+                    cout << "===============================================================" << endl << endl;
+                }
+                output.close();
+                menu = -1;
                 break;
             }
             case 7: //добавление в список
@@ -388,6 +515,7 @@ int main()
             case 0: //выход
             {
                 cout << "Работа завершена!" << endl;
+                cout << "===============================================================" << endl;
                 return 0;
             }
         }
