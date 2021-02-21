@@ -246,6 +246,89 @@ bool DeleteHuman(vector <Human>& list, string value)
     return check;
 }
 
+string Reverse_str(string str) 
+{
+    string result;
+    for (int i = str.size() - 1; i >= 0; i--) 
+    {
+        result.push_back(str[i]);
+    }
+    return result;
+}
+bool Boyer_Moor(vector<Human> humans, Date key) 
+{
+    bool check = false;
+    string listOfDates;
+    string substring;
+    ////////////////////////////////////////
+    if (key.Day < 10) substring += "0";
+    substring += to_string(key.Day);
+    /////////////////////////////////////// 
+    if (key.Month < 10) substring += "0";
+    substring += to_string(key.Month);
+    ///////////////////////////////////////
+    if (key.Year < 10) substring += "0";
+    substring += to_string(key.Year);
+    ///////////////////////////////////////
+    for (int i = 0; i < humans.size(); i++)
+    {
+        string newLine = "";
+        if (humans[i].DateOfBirth.Day < 10) newLine += "0";
+        newLine += to_string(humans[i].DateOfBirth.Day);
+        if (humans[i].DateOfBirth.Month < 10) newLine += "0";
+        newLine += to_string(humans[i].DateOfBirth.Month);
+        if (humans[i].DateOfBirth.Year < 10) newLine += "0";
+        newLine += to_string(humans[i].DateOfBirth.Year);
+        listOfDates += newLine;
+    }
+
+    vector<int> shiftarray(substring.size());
+    string substring_reverse_copy = Reverse_str(substring); //перевернутая строка
+    for (int i = 0; i < substring.size(); i++) //получение массива сдвигов
+    {
+        shiftarray[i] = substring_reverse_copy.find(substring[i]) + 1;
+    }
+    
+    for (int i = 0; i < shiftarray.size(); i++)  //проверка массива сдвигов
+    {
+        cout << shiftarray[i] << " ";
+    }
+    cout << endl;
+
+
+    int current_char = substring.size() - 1;
+    while (current_char < listOfDates.size()) 
+    {
+        int i = substring.size() - 1;
+        if (listOfDates[current_char] == substring[i]) 
+        {
+            int j = current_char;
+            while (listOfDates[j] == substring[i] && i != 0) 
+            {
+                i--;
+                j--;
+            }
+        }
+        if (i == 0)
+        {
+            check = true;
+            return check;
+        }
+        else 
+        {
+            if (substring.find(listOfDates[i]) == -1) 
+            {
+                current_char += substring.size();
+            }
+            else 
+            {
+                current_char += shiftarray[substring.find(listOfDates[i])];
+            }
+        }
+    }
+    return check;
+}
+
 void Save_list(vector<Human> list) 
 {
     ofstream output("Saved.txt");
@@ -314,10 +397,12 @@ int main()
                 cout << "1. Подстроки в строке." << endl;
                 cout << "2. Линейный." << endl;
                 cout << "3. Интерполяционный." << endl;
+                cout << "4. Бойера-Мура." << endl;
+                cout << "5. Coming soon." << endl;
                 cout << "0. Вернуться в меню." << endl;
                 int search;
                 cout << "Поле ввода:\t";
-                while (!(cin >> search) || (cin.peek() != '\n') || (search < 0) || (search > 3)) 
+                while (!(cin >> search) || (cin.peek() != '\n') || (search < 0) || (search > 5)) 
                 {
                     cin.clear();
                     while (cin.get() != '\n') 
@@ -366,6 +451,22 @@ int main()
                         Date key;
                         key.Get_date();
                         if (Interpol_search(Humans, key) == true)
+                        {
+                            cout << "Элемент с такой датой рождения найден." << endl;
+                            cout << "===============================================================" << endl << endl;
+                        }
+                        else
+                        {
+                            cout << "Элемента с такой датой рождения нет!" << endl;
+                            cout << "===============================================================" << endl << endl;
+                        }
+                        break;
+                    }
+                    case 4: 
+                    {
+                        Date key;
+                        key.Get_date();
+                        if (Boyer_Moor(Humans, key) == true)
                         {
                             cout << "Элемент с такой датой рождения найден." << endl;
                             cout << "===============================================================" << endl << endl;
