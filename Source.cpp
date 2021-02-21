@@ -136,11 +136,6 @@ int Substring_search(vector<Human> humans, Date key)
         listOfDates += newLine;
     }
 
-    for (int i = 0; i < humans.size(); i++)
-    {
-        listOfDates.append(to_string(humans[i].DateOfBirth.Day) + to_string(humans[i].DateOfBirth.Month) + to_string(humans[i].DateOfBirth.Year));
-    }
-
     for (int i = 0; i < listOfDates.size() - substring.size(); i++)
     {
         int j = 0;
@@ -255,9 +250,8 @@ string Reverse_str(string str)
     }
     return result;
 }
-bool Boyer_Moor(vector<Human> humans, Date key) 
+int Boyer_Moor(vector<Human> humans, Date key) 
 {
-    bool check = false;
     string listOfDates;
     string substring;
     ////////////////////////////////////////
@@ -289,11 +283,13 @@ bool Boyer_Moor(vector<Human> humans, Date key)
         shiftarray[i] = substring_reverse_copy.find(substring[i]) + 1;
     }
     
+    cout << "Массив сдвигов:" << endl;
+    cout << substring << endl;
     for (int i = 0; i < shiftarray.size(); i++)  //проверка массива сдвигов
     {
         cout << shiftarray[i] << " ";
     }
-    cout << endl;
+    cout << endl << "==============================================================" << endl;
 
 
     int current_char = substring.size() - 1;
@@ -311,8 +307,7 @@ bool Boyer_Moor(vector<Human> humans, Date key)
         }
         if (i == 0)
         {
-            check = true;
-            return check;
+            return current_char / 8 + 1;
         }
         else 
         {
@@ -326,7 +321,68 @@ bool Boyer_Moor(vector<Human> humans, Date key)
             }
         }
     }
-    return check;
+    return -1;
+}
+
+vector<int> Prefix_func(string substring) 
+{
+    vector<int> result(substring.size());
+    result[0] = 0;
+    for (int i = 1; i < result.size(); i++)
+    {
+        int pre_pos = result[i - 1];
+        while (pre_pos > 0 && substring[pre_pos] != substring[i])
+        {
+            pre_pos = result[pre_pos - 1];
+        }
+        result[i] = pre_pos + (substring[pre_pos] == substring[i] ? 1 : 0);
+    }
+    return result;
+}
+int KMP(vector<Human> humans, Date key)
+{
+    string listOfDates; //строка
+    string substring; //подстрока
+    ////////////////////////////////////////
+    if (key.Day < 10) substring += "0";
+    substring += to_string(key.Day);
+    /////////////////////////////////////// 
+    if (key.Month < 10) substring += "0";
+    substring += to_string(key.Month);
+    ///////////////////////////////////////
+    if (key.Year < 10) substring += "0";
+    substring += to_string(key.Year);
+    ///////////////////////////////////////
+    for (int i = 0; i < humans.size(); i++)
+    {
+        string newLine = "";
+        if (humans[i].DateOfBirth.Day < 10) newLine += "0";
+        newLine += to_string(humans[i].DateOfBirth.Day);
+        if (humans[i].DateOfBirth.Month < 10) newLine += "0";
+        newLine += to_string(humans[i].DateOfBirth.Month);
+        if (humans[i].DateOfBirth.Year < 10) newLine += "0";
+        newLine += to_string(humans[i].DateOfBirth.Year);
+        listOfDates += newLine;
+    }
+
+
+    vector <int> pi = Prefix_func(substring); //получение pi массива (префиксов)
+    int k = 0, l = 0; //l - указатель на подстроку, k - на строку
+    while (k < listOfDates.size()) 
+    {
+        if (substring[l] == listOfDates[k])
+        {
+            k++;
+            l++;
+            if (l == substring.size()) return k / 8;
+        }
+        else if (l == 0)
+        {
+            k++;
+        }
+        else if (l != 0) l = pi[l - 1];
+    }
+    return -1;
 }
 
 void Save_list(vector<Human> list) 
@@ -398,7 +454,7 @@ int main()
                 cout << "2. Линейный." << endl;
                 cout << "3. Интерполяционный." << endl;
                 cout << "4. Бойера-Мура." << endl;
-                cout << "5. Coming soon." << endl;
+                cout << "5. K-M-P method." << endl;
                 cout << "0. Вернуться в меню." << endl;
                 int search;
                 cout << "Поле ввода:\t";
@@ -466,14 +522,32 @@ int main()
                     {
                         Date key;
                         key.Get_date();
-                        if (Boyer_Moor(Humans, key) == true)
+                        int pos = Boyer_Moor(Humans, key);
+                        if (pos == -1)
                         {
-                            cout << "Элемент с такой датой рождения найден." << endl;
+                            cout << "Такого элемента нет!" << endl;
                             cout << "===============================================================" << endl << endl;
                         }
                         else
                         {
-                            cout << "Элемента с такой датой рождения нет!" << endl;
+                            cout << "Такой элемент находится под индексом " << pos << endl;
+                            cout << "===============================================================" << endl << endl;
+                        }
+                        break;
+                    }
+                    case 5: 
+                    {
+                        Date key;
+                        key.Get_date();
+                        int pos = KMP(Humans, key);
+                        if (pos == -1) 
+                        {
+                            cout << "Такого элемента нет!" << endl;
+                            cout << "===============================================================" << endl << endl;
+                        }
+                        else 
+                        {
+                            cout << "Такой элемент находится под индексом " << pos << endl;
                             cout << "===============================================================" << endl << endl;
                         }
                         break;
