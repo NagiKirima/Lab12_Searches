@@ -278,11 +278,24 @@ int Boyer_Moor(vector<Human> humans, Date key)
 
     vector<int> shiftarray(substring.size()); //массив сдвигов
     string substring_reverse_copy = Reverse_str(substring); //перевернутая строка
+    int count = 0;
     for (int i = 0; i < substring.size(); i++) //получение массива сдвигов
     {
         shiftarray[i] = substring_reverse_copy.find(substring[i]) + 1;
+        if (substring[i] == substring[substring.size() - 1]) count++;
+        if (i == substring.size() - 1) 
+        {
+            if (count == 1)
+            {
+                shiftarray[substring.size() - 1] = substring.size();
+            }
+            else
+            {
+                int pos = substring.size() - 1;
+                shiftarray[pos] = substring_reverse_copy.find(substring[pos]) + 1;
+            }
+        }
     }
-    
     cout << "Массив сдвигов для строки " << substring << " :" << endl;
     for (int i = 0; i < shiftarray.size(); i++)  //проверка массива сдвигов
     {
@@ -317,7 +330,6 @@ int Boyer_Moor(vector<Human> humans, Date key)
             }
             else 
             {
-                //current_char += shiftarray[substring.find(listOfDates[j])];
                 current_char += shiftarray[i];
             }
         }
