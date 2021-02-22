@@ -153,15 +153,9 @@ int Substring_search(vector<Human> humans, Date key)
 }
 int Line_search(vector<Human> humans, Date key) 
 {
-    vector<int> date_list;
-    int tmp_key = key.Day * 1000000 + key.Month * 10000 + key.Year;
-    for (int i = 0; i < humans.size(); i++)
+    for (int i = 0; i < humans.size(); i++) 
     {
-        date_list.push_back(humans[i].DateOfBirth.Day*1000000 + humans[i].DateOfBirth.Month*10000 + humans[i].DateOfBirth.Year);
-    }
-    for (int i = 0; i < date_list.size(); i++) 
-    {
-        if (date_list[i] == tmp_key) 
+        if (humans[i].DateOfBirth.Day == key.Day && humans[i].DateOfBirth.Month == key.Month && humans[i].DateOfBirth.Year == key.Year)
         {
             return i;
         }
@@ -296,6 +290,7 @@ int Boyer_Moor(vector<Human> humans, Date key)
             }
         }
     }
+
     cout << "Массив сдвигов для строки " << substring << " :" << endl;
     for (int i = 0; i < shiftarray.size(); i++)  //проверка массива сдвигов
     {
