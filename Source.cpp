@@ -276,15 +276,14 @@ int Boyer_Moor(vector<Human> humans, Date key)
         listOfDates += newLine;
     }
 
-    vector<int> shiftarray(substring.size());
+    vector<int> shiftarray(substring.size()); //массив сдвигов
     string substring_reverse_copy = Reverse_str(substring); //перевернутая строка
     for (int i = 0; i < substring.size(); i++) //получение массива сдвигов
     {
         shiftarray[i] = substring_reverse_copy.find(substring[i]) + 1;
     }
     
-    cout << "Массив сдвигов:" << endl;
-    cout << substring << endl;
+    cout << "Массив сдвигов для строки " << substring << " :" << endl;
     for (int i = 0; i < shiftarray.size(); i++)  //проверка массива сдвигов
     {
         cout << shiftarray[i] << " ";
@@ -296,9 +295,10 @@ int Boyer_Moor(vector<Human> humans, Date key)
     while (current_char < listOfDates.size()) 
     {
         int i = substring.size() - 1;
+        int j = current_char;
         if (listOfDates[current_char] == substring[i]) 
         {
-            int j = current_char;
+           // int j = current_char;
             while (listOfDates[j] == substring[i] && i != 0) 
             {
                 i--;
@@ -311,31 +311,46 @@ int Boyer_Moor(vector<Human> humans, Date key)
         }
         else 
         {
-            if (substring.find(listOfDates[i]) == -1) 
+            if (substring.find(listOfDates[j]) == -1) 
             {
                 current_char += substring.size();
             }
             else 
             {
-                current_char += shiftarray[substring.find(listOfDates[i])];
+                //current_char += shiftarray[substring.find(listOfDates[j])];
+                current_char += shiftarray[i];
             }
         }
     }
     return -1;
 }
 
-vector<int> Prefix_func(string substring) 
+vector<int> Prefix_func(string str) 
 {
-    vector<int> result(substring.size());
+    //Важно: максимальный префикс в подстроке может увеличиваться только на 1, но изменяться на неограниченное количество (до 0)
+    vector<int> result(str.size());
     result[0] = 0;
-    for (int i = 1; i < result.size(); i++)
+    int j = 1, i = 0; //i - указатель на начало подстроки j - указатель j-ый элемент подстроки 
+    while (j < str.size())
     {
-        int pre_pos = result[i - 1];
-        while (pre_pos > 0 && substring[pre_pos] != substring[i])
+        if (str[i] != str[j])
         {
-            pre_pos = result[pre_pos - 1];
+            if (i == 0)
+            {
+                result[j] = 0;
+                j++;
+            }
+            else
+            {
+                i = 0; //i указывает на 0 элемент подстроки
+            }
         }
-        result[i] = pre_pos + (substring[pre_pos] == substring[i] ? 1 : 0);
+        else
+        {
+            result[j] = i + 1;
+            i++; //сдвиг i-го указателя, проверка со следующим j-ым элементом, в случае неравенства обнуляется
+            j++; //обычный сдвиг j-го указателя
+        }
     }
     return result;
 }
@@ -370,17 +385,20 @@ int KMP(vector<Human> humans, Date key)
     int k = 0, l = 0; //l - указатель на подстроку, k - на строку
     while (k < listOfDates.size()) 
     {
-        if (substring[l] == listOfDates[k])
+        if (substring[l] == listOfDates[k]) //обычная проверка k-го элемента строки и l-го элемента подстроки
         {
             k++;
             l++;
             if (l == substring.size()) return k / 8;
         }
-        else if (l == 0)
+        else
         {
-            k++;
+            if (l == 0) // сдвиг k в случае неравенства элемента подстроки и строки (l - указывает на начало подстроки)
+            {
+                k++;
+            }
+            else l = pi[l - 1];
         }
-        else if (l != 0) l = pi[l - 1];
     }
     return -1;
 }
